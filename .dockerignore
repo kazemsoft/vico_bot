@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+
+# V build artifacts
+*.tmp
+*.o
+*.so
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Node modules (if any)
+node_modules/
+
+# Environment
+.env
+.env.local
+
+# Docker
+docker-compose.override.yml
