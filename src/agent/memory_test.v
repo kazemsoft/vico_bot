@@ -1,0 +1,37 @@
+module agent
+
+fn test_memory_add_and_recent() {
+	mut s := new_memory_store(3)
+	s.add_long('L1')
+	s.add_short('two')
+	s.add_short('one')
+
+	res := s.recent(10)
+	assert res.len == 3, 'expected 3 items, got ${res.len}'
+	assert res[0].text == 'one', 'expected first to be one'
+	assert res[1].text == 'two', 'expected second to be two'
+	assert res[2].text == 'L1', 'expected third to be L1'
+}
+
+fn test_short_limit() {
+	mut s := new_memory_store(2)
+	s.add_short('c')
+	s.add_short('b')
+	s.add_short('a')
+
+	res := s.recent(10)
+	assert res.len == 2, 'expected 2 items due to limit, got ${res.len}'
+	assert res[0].text == 'a', 'expected first to be a'
+	assert res[1].text == 'b', 'expected second to be b'
+}
+
+fn test_query_by_keyword() {
+	mut s := new_memory_store(10)
+	s.add_long('apple pie recipe')
+	s.add_short('Remember the apple')
+
+	res := s.query_by_keyword('apple', 10)
+	assert res.len == 2, 'expected 2 results, got ${res.len}'
+	assert res[0].text == 'Remember the apple', 'expected short first'
+	assert res[1].text == 'apple pie recipe', 'expected long second'
+}
