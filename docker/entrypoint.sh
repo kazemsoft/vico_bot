@@ -8,6 +8,16 @@ set -euo pipefail
 CONFIG="${VICOBOT_HOME}/config.json"
 
 # ────────────────────────────────────────────────
+# Fix permissions on mounted volumes (if running as root)
+# ────────────────────────────────────────────────
+if [ "$(id -u)" = "0" ]; then
+    echo "→ Fixing permissions on ${VICOBOT_HOME}"
+    chown -R vicobot:vicobot "${VICOBOT_HOME}"
+    echo "→ Switching to vicobot user"
+    exec su-exec vicobot "$0" "$@"
+fi
+
+# ────────────────────────────────────────────────
 # Auto-onboard if config doesn't exist yet
 # ────────────────────────────────────────────────
 

@@ -16,8 +16,8 @@ RUN chmod +x /build/vicobot
 # Final stage - Alpine with minimal setup
 FROM alpine
 
-# Install CA certificates and create user
-RUN apk add --no-cache ca-certificates bash curl coreutils
+# Install CA certificates, create user, and add su-exec for permission fixing
+RUN apk add --no-cache ca-certificates bash curl coreutils su-exec
 RUN addgroup -S vicobot && adduser -S vicobot -G vicobot
 
 # Copy necessary files from builder
@@ -37,10 +37,13 @@ RUN mkdir -p /home/vicobot/.vicobot && chown -R vicobot:vicobot /home/vicobot
 USER vicobot
 RUN /vicobot onboard
 
+# Switch back to root for entrypoint setup
+USER root
+
 # Copy entrypoint script for runtime environment variable substitution
-COPY --chown=vicobot:vicobot docker/entrypoint.sh /entrypoint.sh
+COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-USER vicobot
+# Start as root to fix mounted volume permissions, entrypoint drops to vicobot
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["gateway"]
