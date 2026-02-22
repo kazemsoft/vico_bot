@@ -1,4 +1,4 @@
-module agent
+module memory
 
 // SimpleRanker provides basic memory ranking without LLM.
 pub struct SimpleRanker {}

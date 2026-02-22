@@ -1,22 +1,24 @@
 module agent
 
-import time
-import regex
-import context
 import chat
-import providers
-import session
+import context
 import cron
+import memory
+import providers
+import regex
+import session
+import time
+import tools
 
 // Make scheduler optional — much cleaner
 pub struct AgentLoop {
 mut:
 	hub            &chat.Hub
 	provider       providers.LLMProvider
-	tools          &Registry
+	tools          &tools.Registry
 	sessions       &session.SessionManager
 	context        &ContextBuilder
-	memory         &MemoryStore
+	memory         &memory.MemoryStore
 	model          string
 	max_iterations int
 	running        bool
@@ -38,34 +40,34 @@ pub fn new_agent_loop(hub &chat.Hub,
 		mut_workspace = '.'
 	}
 
-	mut reg := new_registry()
+	mut reg := tools.new_registry()
 
-	reg.register(new_message_tool(hub))
-	reg.register(new_filesystem_tool(mut_workspace))
-	reg.register(new_exec_tool(60))
-	reg.register(new_web_tool())
-	reg.register(new_spawn_tool())
+	reg.register(tools.new_message_tool(hub))
+	reg.register(tools.new_filesystem_tool(mut_workspace))
+	reg.register(tools.new_exec_tool(60))
+	reg.register(tools.new_web_tool())
+	reg.register(tools.new_spawn_tool())
 
 	// Safely register cron tool only when provided
 	if mut s := scheduler {
-		reg.register(new_cron_tool(s))
+		reg.register(tools.new_cron_tool(s))
 	}
 
 	sm := session.new_session_manager(mut_workspace)
-	ranker := new_llm_ranker(provider, mut_model)
+	ranker := memory.new_llm_ranker(provider, mut_model)
 
 	// If Ranker interface expects non-error return, wrap it
 	mut ctx := new_context_builder(mut_workspace, ranker, 5)
 
-	mem := new_memory_store_with_workspace(mut_workspace, 100)
-	reg.register(new_write_memory_tool(mem))
+	mem := memory.new_memory_store_with_workspace(mut_workspace, 100)
+	reg.register(tools.new_write_memory_tool(mem))
 
 	// skill tools ...
-	skill_mgr := new_skill_manager(mut_workspace)
-	reg.register(new_create_skill_tool(skill_mgr))
-	reg.register(new_list_skills_tool(skill_mgr))
-	reg.register(new_read_skill_tool(skill_mgr))
-	reg.register(new_delete_skill_tool(skill_mgr))
+	skill_mgr := tools.new_skill_manager(mut_workspace)
+	reg.register(tools.new_create_skill_tool(skill_mgr))
+	reg.register(tools.new_list_skills_tool(skill_mgr))
+	reg.register(tools.new_read_skill_tool(skill_mgr))
+	reg.register(tools.new_delete_skill_tool(skill_mgr))
 
 	return &AgentLoop{
 		hub:            hub

@@ -1,4 +1,4 @@
-module agent
+module tools
 
 fn test_exec_tool() {
 	mut t := new_exec_tool(5)

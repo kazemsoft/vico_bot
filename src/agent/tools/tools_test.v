@@ -1,4 +1,4 @@
-module agent
+module tools
 
 struct TestTool {
 mut:

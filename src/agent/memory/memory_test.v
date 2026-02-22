@@ -1,4 +1,4 @@
-module agent
+module memory
 
 fn test_memory_add_and_recent() {
 	mut s := new_memory_store(3)

@@ -1,4 +1,4 @@
-module agent
+module skills
 
 fn test_skills_loader_empty() {
 	loader := new_skills_loader('/nonexistent/path')

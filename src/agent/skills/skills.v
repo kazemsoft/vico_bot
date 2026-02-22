@@ -1,4 +1,4 @@
-module agent
+module skills
 
 import os
 

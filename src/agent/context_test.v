@@ -1,16 +1,18 @@
 module agent
 
+import memory
+
 fn test_build_messages_includes_memories() ! {
-	cb := new_context_builder('.', new_simple_ranker(), 5)
+	cb := new_context_builder('.', memory.new_simple_ranker(), 5)
 
 	history := ['user: hi']
 
 	mems := [
-		MemoryItem{
+		memory.MemoryItem{
 			kind: 'short'
 			text: 'remember this'
 		},
-		MemoryItem{
+		memory.MemoryItem{
 			kind: 'long'
 			text: 'big fact'
 		},

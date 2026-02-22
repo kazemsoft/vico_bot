@@ -1,4 +1,4 @@
-module agent
+module memory
 
 import providers
 import x.json2

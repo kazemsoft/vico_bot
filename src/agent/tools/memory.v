@@ -1,12 +1,14 @@
-module agent
+module tools
+
+import memory as memory_module
 
 @[heap]
 pub struct WriteMemoryTool {
 mut:
-	memory &MemoryStore
+	memory &memory_module.MemoryStore
 }
 
-pub fn new_write_memory_tool(memory &MemoryStore) &WriteMemoryTool {
+pub fn new_write_memory_tool(memory &memory_module.MemoryStore) &WriteMemoryTool {
 	return &WriteMemoryTool{
 		memory: memory
 	}
