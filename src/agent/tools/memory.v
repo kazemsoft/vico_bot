@@ -46,8 +46,14 @@ pub fn (mut t WriteMemoryTool) execute(args map[string]string) !string {
 			return 'Added to short-term memory'
 		}
 		'long' {
-			t.memory.add_long(content)
-			return 'Added to long-term memory'
+			if append {
+				prev := t.memory.read_long_term() or { '' }
+				new_content := if prev == '' { content } else { prev + '\n' + content }
+				t.memory.write_long_term(new_content)!
+				return 'Appended to long-term memory'
+			}
+			t.memory.write_long_term(content)!
+			return 'Wrote long-term memory'
 		}
 		else {
 			return error('invalid target: ${target}. Use "today" or "long"')

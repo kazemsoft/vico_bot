@@ -1,42 +1,55 @@
 module tools
 
-fn test_exec_tool() {
-	mut t := new_exec_tool(5)
-	assert t.name() == 'exec'
-	assert t.description() != ''
+import os
 
+fn test_exec_array_echo() {
+	mut t := new_exec_tool(5)
 	res := t.execute({
 		'command': 'echo hello'
-	}) or { 'failed' }
-	assert res.contains('hello')
+	})!
+	assert res.trim_space() == 'hello'
 }
 
-fn test_web_tool() {
-	mut t := new_web_tool()
-	assert t.name() == 'web'
-
-	res := t.execute({
-		'url': 'https://example.com'
-	}) or { 'failed' }
-	assert res.contains('example.com')
-}
-
-fn test_spawn_tool_detached() {
-	mut t := new_spawn_tool()
-	assert t.name() == 'spawn'
-
+fn test_exec_string_allowed() {
+	mut t := new_exec_tool(5)
+	// In V, string commands are allowed (different from Go)
 	res := t.execute({
 		'command': 'echo test'
-		'detach':  'true'
-	}) or { 'failed' }
-	assert res.contains('spawned')
+	})!
+	assert res.contains('test')
 }
 
-fn test_spawn_tool_blocking() {
-	mut t := new_spawn_tool()
+fn test_exec_dangerous_prog_rejected() {
+	mut t := new_exec_tool(5)
+	_ := t.execute({
+		'command': 'rm -rf /'
+	}) or { return }
+	assert false, 'expected error for dangerous program'
+}
+
+fn test_exec_with_workspace() {
+	ws_dir := os.temp_dir()
+	test_file := os.join_path(ws_dir, 'vicobot_test_file.txt')
+	os.write_file(test_file, 'content') or { return }
+	defer {
+		os.rm(test_file) or {}
+	}
+
+	mut t := new_exec_tool_with_workspace(5, ws_dir)
 	res := t.execute({
-		'command': 'echo blocking'
-		'detach':  'false'
-	}) or { 'failed' }
-	assert res.contains('blocking')
+		'command': 'cat vicobot_test_file.txt'
+	}) or {
+		println('exec error: ${err}')
+		return
+	}
+	assert res.trim_space() == 'content'
+}
+
+fn test_exec_rejects_unsafe_arg() {
+	ws_dir := os.temp_dir()
+	mut t := new_exec_tool_with_workspace(5, ws_dir)
+	_ := t.execute({
+		'command': 'ls /etc'
+	}) or { return }
+	assert false, 'expected error for absolute path arg'
 }

@@ -1,10 +1,15 @@
 module tools
 
 import os
+import memory
 
 fn test_write_memory_tool_today() {
-	tmp := os.temp_dir()
-	mem := new_memory_store_with_workspace(tmp, 10)
+	tmp := os.join_path(os.temp_dir(), 'vicobot_test_mem_today')
+	os.mkdir_all(tmp) or { return }
+	defer {
+		os.rmdir_all(tmp) or {}
+	}
+	mem := memory.new_memory_store_with_workspace(tmp, 10)
 	mut wt := new_write_memory_tool(mem)
 
 	wt.execute({
@@ -17,8 +22,12 @@ fn test_write_memory_tool_today() {
 }
 
 fn test_write_memory_tool_long() {
-	tmp := os.temp_dir()
-	mem := new_memory_store_with_workspace(tmp, 10)
+	tmp := os.join_path(os.temp_dir(), 'vicobot_test_mem_long')
+	os.mkdir_all(tmp) or { return }
+	defer {
+		os.rmdir_all(tmp) or {}
+	}
+	mem := memory.new_memory_store_with_workspace(tmp, 10)
 	mut wt := new_write_memory_tool(mem)
 
 	wt.execute({
@@ -31,8 +40,12 @@ fn test_write_memory_tool_long() {
 }
 
 fn test_write_memory_tool_overwrite() {
-	tmp := os.temp_dir()
-	mem := new_memory_store_with_workspace(tmp, 10)
+	tmp := os.join_path(os.temp_dir(), 'vicobot_test_mem_overwrite')
+	os.mkdir_all(tmp) or { return }
+	defer {
+		os.rmdir_all(tmp) or {}
+	}
+	mem := memory.new_memory_store_with_workspace(tmp, 10)
 	mut wt := new_write_memory_tool(mem)
 
 	wt.execute({

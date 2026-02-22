@@ -63,6 +63,23 @@ pub fn (mut t CronTool) set_context(channel string, chat_id string) {
 	t.chat_id = chat_id
 }
 
+fn parse_duration_string(duration_str string) !time.Duration {
+	mut duration := time.Duration(0)
+	if duration_str.ends_with('s') {
+		seconds := duration_str[..duration_str.len - 1].int()
+		duration = seconds * time.second
+	} else if duration_str.ends_with('m') {
+		minutes := duration_str[..duration_str.len - 1].int()
+		duration = minutes * time.minute
+	} else if duration_str.ends_with('h') {
+		hours := duration_str[..duration_str.len - 1].int()
+		duration = hours * time.hour
+	} else {
+		return error('invalid format: ${duration_str} (use s, m, or h suffix)')
+	}
+	return duration
+}
+
 pub fn (mut t CronTool) execute(args map[string]string) !string {
 	action := args['action'] or { return error('action is required') }
 
@@ -72,20 +89,7 @@ pub fn (mut t CronTool) execute(args map[string]string) !string {
 			message := args['message'] or { return error('message is required') }
 			delay_str := args['delay'] or { return error("delay is required (e.g. '2m', '1h')") }
 
-			mut delay := time.Duration(0)
-			if delay_str.ends_with('s') {
-				seconds := delay_str[..delay_str.len - 1].int()
-				delay = seconds * time.second
-			} else if delay_str.ends_with('m') {
-				minutes := delay_str[..delay_str.len - 1].int()
-				delay = minutes * time.minute
-			} else if delay_str.ends_with('h') {
-				hours := delay_str[..delay_str.len - 1].int()
-				delay = hours * time.hour
-			} else {
-				return error('invalid delay format: ${delay_str} (use s, m, or h suffix)')
-			}
-
+			delay := parse_duration_string(delay_str)!
 			if delay < 30 * time.second {
 				return error('delay must be at least 30s (got ${delay_str})')
 			}
@@ -94,7 +98,14 @@ pub fn (mut t CronTool) execute(args map[string]string) !string {
 			recurring := recurring_str == 'true'
 
 			if recurring {
-				return 'Recurring jobs not yet supported.'
+				interval_str := args['interval'] or { '1m' }
+				interval_duration := parse_duration_string(interval_str)!
+				if interval_duration < 30 * time.second {
+					return error('interval must be at least 30s (got ${interval_str})')
+				}
+				id := t.scheduler.add_recurring(name, message, interval_duration, t.channel,
+					t.chat_id)
+				return 'Scheduled recurring job "${name}" (id: ${id}). Will fire every ${interval_str}.'
 			}
 
 			id := t.scheduler.add(name, message, delay, t.channel, t.chat_id)

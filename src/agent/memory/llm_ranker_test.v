@@ -76,8 +76,8 @@ fn test_llm_ranker_uses_provider() {
 	mut mock_provider := providers.new_mock_provider()
 	mock_provider.tool_calls = [
 		providers.ToolCall{
-			id:   '1'
-			name: 'rank_memories'
+			id:        '1'
+			name:      'rank_memories'
 			arguments: {
 				'indices': json2.Any([json2.Any(1), json2.Any(0)])
 			}
@@ -107,8 +107,8 @@ fn test_llm_ranker_parses_float_indices() {
 	mut mock_provider := providers.new_mock_provider()
 	mock_provider.tool_calls = [
 		providers.ToolCall{
-			id:   '1'
-			name: 'rank_memories'
+			id:        '1'
+			name:      'rank_memories'
 			arguments: {
 				'indices': json2.Any([json2.Any(f64(2)), json2.Any(f64(0))])
 			}
