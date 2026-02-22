@@ -201,6 +201,19 @@ v -prod -cflags "-Os -flto -s" -o vicobot src/main.v
 v -prod -os linux -arch arm64 -o vicobot-arm64 src/main.v
 ```
 
+## Testing
+
+```bash
+# Run all tests sequentially (recommended)
+./run_tests.vsh
+
+# Or run individual test files
+v test src/agent/memory/
+v test src/agent/tools/
+```
+
+The test runner (`run_tests.vsh`) automatically discovers all `*_test.v` files and runs them sequentially to avoid parallel runner issues.
+
 ## Docs
 
 - [AGENTS.md](AGENTS.md) — Development guide (build, code style, patterns)
